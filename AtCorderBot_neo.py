@@ -87,6 +87,13 @@ async def on_message(message):
                 "https://github.com/iwatepu-cpc/AtCorderBot"
             await client.send_message(message.channel,str)
 
+    # 「つかれた」で始まるか調べる
+    if message.content.startswith("コンテストつかれた"):
+        str = "コンテストお疲れ様！！\n" + \
+            "レートは上がったかな？？ ^^"
+        if client.user != message.author:
+            await client.send_message(message.channel, str)
+
     # 「/コンテスト」で始まるか調べる
     if message.content.startswith("/コンテスト"):
         if client.user != message.author:
