@@ -1,66 +1,55 @@
 #!/usr/bin/env python
 # coding: utf-8
+import schedule
 from datetime import datetime
+import time
+import requests
 import discord
-import json
-import urllib.request
+import asyncio
 import get_env
+from get_info import get_info
 
-
-def getInfo(when):
-    # API => https://github.com/kenkoooo/AtCoderProblems/
-
-    url = 'https://kenkoooo.com/atcoder/resources/contests.json'
-    base_url = 'https://atcoder.jp/contests/'
-    w_list = ['月', '火', '水', '木', '金', '土', '日']
-
-    try:
-        response = urllib.request.urlopen(url)
-        html = response.read().decode('utf-8')
-    except urllib.error.HTTPError as e:
-        print('HTTPError: ', e)
-
-    info_json = json.loads(html)
-    info_json.sort(key=lambda x: x['start_epoch_second'])
-    info_json.reverse()
-
-    if when == 0:
-        output = "【 開催済みコンテスト情報 (過去3回分)】\n" + \
-                 "==================================\n"
-    else:
-        output = "【 開催予定コンテスト情報 】\n" + \
-            "==================================\n"
-
-    for i, info in enumerate(info_json):
-        start_time = info['start_epoch_second']
-        start_time = datetime.fromtimestamp(start_time)
-
-        if when == 0 and i == 3:
-            break
-
-        elif when == 1 and start_time < datetime.now():
-            if i == 0:
-                output += "開催予定情報なし\n" + \
-                    "==================================\n"
-            break
-
-        duration = int(info['duration_second']/60)
-        # print(start_time, w_list[start_time.weekday()],
-        #       duration, info['rate_change'], info['title'])
-
-        output += "タイトル:" + info['title'] + "\n" + \
-            "開催日　:" + "{0:%Y/%m/%d}".format(start_time.date()) + " (" + w_list[start_time.weekday()] + ")\n" + \
-            "開催時間:" + "{0:%H:%M}".format(start_time.time()) + "～" + \
-            "(" + str(duration) + "分)\n" + \
-            base_url + info['id'] + "\n" + \
-            "==================================\n"
-
-    return output
-
+old_output = "【 開催予定コンテスト情報 】\n==================================\n開催予定情報なし\n==================================\n"
+# old_output = ""
+contestday_str = "今日はコンテスト開催日！\nみんな頑張ろう！"
 
 client = discord.Client()
 
+# =====================================
+# 定期実行関係 (webhookを使う)
+# =====================================
+def webhook(message):
+   discord_webhook_url = get_env.WEBHOOK1
+   data = {"content": " " + message + " "}
+   requests.post(discord_webhook_url, data=data)
 
+# 定期実行させたい処理
+def regularly():
+    global old_output
+
+    print(datetime.now(), "更新チェック")
+    now_output, is_today = get_info(1)
+
+    if old_output != now_output:
+        old_output=now_output
+        webhook(old_output)
+    
+    if is_today == True:
+        webhook(contestday_str)
+
+# 毎日12時30分
+schedule.every().day.at("12:30").do(regularly)
+
+@client.event
+async def greeting_gm():
+    while True:
+        schedule.run_pending()
+        await asyncio.sleep(3600)
+
+
+# =====================================
+# 返答型Bot関係
+# =====================================
 @client.event
 async def on_ready():
     print('Logged in as')
@@ -69,8 +58,8 @@ async def on_ready():
     print('------')
     # channel_bot_test = [
     #     channel for channel in client.get_all_channels() if channel.name == 'general'][0]
-    # await channel_bot_test.send(getInfo(1))
-
+    # await channel_bot_test.send(get_info(1))
+    await greeting_gm()
 
 @client.event
 async def on_message(message):
@@ -80,6 +69,7 @@ async def on_message(message):
         if client.user != message.author:
             # メッセージが送られてきたチャンネルへメッセージを送ります
             str = "あの **AtCorderBot** が帰ってきた！\n" + \
+                "new!→ 定期的にコンテスト情報をチェックして、新着情報をお知らせするよ！\n" + \
                 "`/コンテスト` でコンテストの開催予定を教えるよ！\n" + \
                 "`/ENDコンテスト` で過去3回分の開催済みコンテストを教えるよ！\n" + \
                 "この説明は `/readme` でいつでも聞けるよ！\n" + \
@@ -97,11 +87,15 @@ async def on_message(message):
     # 「/コンテスト」で始まるか調べる
     if message.content.startswith("/コンテスト"):
         if client.user != message.author:
-            await client.send_message(message.channel, getInfo(1))
+            output, is_today = get_info(1)
+            await client.send_message(message.channel, output)
+            if is_today == True:
+                await client.send_message(message.channel, contestday_str)
+
 
     # 「/ENDコンテスト」で始まるか調べる
     if message.content.startswith("/ENDコンテスト"):
         if client.user != message.author:
-            await client.send_message(message.channel, getInfo(0))
+            await client.send_message(message.channel, get_info(0)[0])
 
 client.run(get_env.API_KEY)

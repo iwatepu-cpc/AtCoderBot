@@ -12,6 +12,8 @@ AtCorderBot_neo.py が現在運用しているコードです。
 | python        | 3.6.8      |
 | discord.py    | 0.16.12    |
 | python-dotenv | 0.10.1     |
+| requests      | 2.21.0     |
+| schedule      | 0.6.0      |
 
 ## Heroku起動コマンド
 ```
