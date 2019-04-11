@@ -1,1 +1,1 @@
-bot: python AtCorderBot_neo.py
+bot: python AtCoderBot_neo.py

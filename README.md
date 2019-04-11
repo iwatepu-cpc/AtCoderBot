@@ -1,9 +1,9 @@
-# AtCorderBot
+# AtCoderBot
 
-## AtCorderのコンテスト情報を教える Discord Bot です。 
+## AtCoderのコンテスト情報を教える Discord Bot です。 
 
-AtCorderBot.py が2018年前期まで稼働していたコード。  
-AtCorderBot_neo.py が現在運用しているコードです。  
+AtCoderBot.py が2018年前期まで稼働していたコード。  
+AtCoderBot_neo.py が現在運用しているコードです。  
 
 ## 動作環境
 |               |            |

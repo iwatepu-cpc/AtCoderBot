@@ -68,13 +68,13 @@ async def on_message(message):
         # 送り主がBotだった場合反応したくないので
         if client.user != message.author:
             # メッセージが送られてきたチャンネルへメッセージを送ります
-            str = "あの **AtCorderBot** が帰ってきた！\n" + \
+            str = "あの **AtCoderBot** が帰ってきた！\n" + \
                 "new!→ 定期的にコンテスト情報をチェックして、新着情報をお知らせするよ！\n" + \
                 "`/コンテスト` でコンテストの開催予定を教えるよ！\n" + \
                 "`/ENDコンテスト` で過去3回分の開催済みコンテストを教えるよ！\n" + \
                 "この説明は `/readme` でいつでも聞けるよ！\n" + \
                 "使いづらいクソBotだと感じた時は以下のリポジトリにプルリクしてね！" + \
-                "https://github.com/iwatepu-cpc/AtCorderBot"
+                "https://github.com/iwatepu-cpc/AtCoderBot"
             await client.send_message(message.channel,str)
 
     # 「つかれた」で始まるか調べる
