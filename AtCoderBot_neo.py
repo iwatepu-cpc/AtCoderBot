@@ -7,11 +7,11 @@ import requests
 import discord
 import asyncio
 import get_env
-from get_info import get_info
+import contest_info as content
 
 old_output = "【 開催予定コンテスト情報 】\n==================================\n開催予定情報なし\n==================================\n"
 # old_output = ""
-contestday_str = "今日はコンテスト開催日！\nみんな頑張ろう！"
+contestday_str = "**今日はコンテスト開催日！\nみんな頑張ろう！**\n.\n"
 
 client = discord.Client()
 
@@ -28,7 +28,8 @@ def regularly():
     global old_output
 
     print(datetime.now(), "更新チェック")
-    now_output, is_today = get_info(1)
+    content.scraping_info()
+    now_output, is_today = content.get_upcoming()
 
     if old_output != now_output:
         old_output=now_output
@@ -58,7 +59,7 @@ async def on_ready():
     print('------')
     # channel_bot_test = [
     #     channel for channel in client.get_all_channels() if channel.name == 'general'][0]
-    # await channel_bot_test.send(get_info(1))
+    # await channel_bot_test.send(get_upcoming())
     await greeting_gm()
 
 @client.event
@@ -68,8 +69,10 @@ async def on_message(message):
         # 送り主がBotだった場合反応したくないので
         if client.user != message.author:
             # メッセージが送られてきたチャンネルへメッセージを送ります
-            str = "あの **AtCoderBot** が帰ってきた！\n" + \
-                "new!→ 定期的にコンテスト情報をチェックして、新着情報をお知らせするよ！\n" + \
+            str = "**もう無能とは言わせない！！**\n" + \
+                "あの **AtCoderBot** がまたまた帰ってきた！\n" + \
+                "ユーザAPIに頼らず、独自にスクレイピングを行うように進化。\n" + \
+                "定期的にコンテスト情報をチェックして、新着情報をお知らせするよ！\n" + \
                 "`/コンテスト` でコンテストの開催予定を教えるよ！\n" + \
                 "`/ENDコンテスト` で過去3回分の開催済みコンテストを教えるよ！\n" + \
                 "この説明は `/readme` でいつでも聞けるよ！\n" + \
@@ -87,15 +90,15 @@ async def on_message(message):
     # 「/コンテスト」で始まるか調べる
     if message.content.startswith("/コンテスト"):
         if client.user != message.author:
-            output, is_today = get_info(1)
-            await client.send_message(message.channel, output)
+            output, is_today = content.get_upcoming()
             if is_today == True:
                 await client.send_message(message.channel, contestday_str)
+            await client.send_message(message.channel, output)
 
 
     # 「/ENDコンテスト」で始まるか調べる
     if message.content.startswith("/ENDコンテスト"):
         if client.user != message.author:
-            await client.send_message(message.channel, get_info(0)[0])
+            await client.send_message(message.channel, content.get_recent()[0])
 
 client.run(get_env.API_KEY)
