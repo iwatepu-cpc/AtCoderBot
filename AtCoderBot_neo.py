@@ -9,13 +9,13 @@ import asyncio
 import get_env
 import contest_info as content
 
-old_output = "【 開催予定コンテスト情報 】\n==================================\n開催予定情報なし\n==================================\n"
-# old_output = ""
+old_output_text_path = "./old_output.txt"
 contestday_str = "**今日はコンテスト開催日！\nみんな頑張ろう！**\n.\n"
 
 client = discord.Client()
 
 # =====================================
+# AtCorderBot【定期便】
 # 定期実行関係 (webhookを使う)
 # =====================================
 def webhook(message):
@@ -31,21 +31,27 @@ def regularly():
     content.scraping_info()
     now_output, is_today = content.get_upcoming()
 
+    with open(old_output_text_path, "r") as f:
+         old_output = f.read()
+
     if old_output != now_output:
-        old_output=now_output
-        webhook(old_output)
+        with open(old_output_text_path, "w+") as f:
+            f.write(now_output)
+        webhook(now_output)
     
     if is_today == True:
         webhook(contestday_str)
 
 # 毎日12時30分
 schedule.every().day.at("12:30").do(regularly)
+# schedule.every(10).seconds.do(regularly)
 
 @client.event
 async def greeting_gm():
     while True:
         schedule.run_pending()
-        await asyncio.sleep(3600)
+        await asyncio.sleep(1000)
+        # await asyncio.sleep(10)
 
 
 # =====================================

@@ -7,7 +7,7 @@ import urllib.request
 from bs4 import BeautifulSoup
 
 url = 'https://atcoder.jp/contests/?lang=ja'
-base_url = 'https://atcoder.jp/contests/'
+base_url = 'https://atcoder.jp'
 
 
 def scraping_info():
